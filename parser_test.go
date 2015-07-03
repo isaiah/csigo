@@ -7,8 +7,8 @@ import (
 
 var (
 	expectedPrelude = Prelude{"Adam Petersen", "990442e", "2013-08-29"}
-	expectedChange  = Change{LocAdded: 1, LocDeleted: 0, Entry: "project.clj"}
-	expectedChange2 = Change{LocAdded: 2, LocDeleted: 4, Entry: "src/code_maat/parsers/git.clj"}
+	expectedChange  = Change{LocAdded: 1, LocDeleted: 0, Entity: "project.clj"}
+	expectedChange2 = Change{LocAdded: 2, LocDeleted: 4, Entity: "src/code_maat/parsers/git.clj"}
 	expectedEntry   = Entry{Prelude: &expectedPrelude, Changes: []Change{expectedChange, expectedChange2}}
 )
 
@@ -43,7 +43,7 @@ func TestParseChange(t *testing.T) {
 
 func TestParseChangeWithInvisibleFile(t *testing.T) {
 	change := parseChange("1   0    .gitignore", t)
-	if change.Entry != ".gitignore" {
+	if change.Entity != ".gitignore" {
 		t.Error("cannot find invisible file")
 	}
 }

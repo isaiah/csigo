@@ -100,7 +100,7 @@ func (p *Parser) change() (*Change, error) {
 	if tok != FILE {
 		return nil, fmt.Errorf("found %d, expected FILE", tok)
 	}
-	change.Entry = lit
+	change.Entity = lit
 
 	return change, nil
 }
