@@ -25,7 +25,7 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 	// If we see whitespace then consume all contiguous whitespace.
 	// If we see a letter then consume as an ident or reserved word.
 	// If we see a digit then consume as a number.
-	if isEmpty(ch) {
+	if isWhitespace(ch) {
 		s.unread()
 		return s.scanWhitespace()
 	} else if isDash(ch) {
@@ -94,7 +94,7 @@ func (s *Scanner) scanPrelude() (tok Token, lit string) {
 	for {
 		if ch := s.read(); ch == eof {
 			break
-		} else if isAlphaNum(ch) || isDash(ch) || ch == '.' || isWhitespace(ch) {
+		} else if isAlphaNum(ch) || isDash(ch) || isFilePath(ch) || isSpace(ch) {
 			if isWhitespace(ch) {
 				if wasWS {
 					buf.Truncate(buf.Len() - 1)
@@ -102,6 +102,8 @@ func (s *Scanner) scanPrelude() (tok Token, lit string) {
 					break
 				}
 				wasWS = true
+			} else {
+				wasWS = false
 			}
 			if isDash(ch) {
 				s.unread()
@@ -123,10 +125,10 @@ func (s *Scanner) scanPrelude() (tok Token, lit string) {
 		return DATE, str
 	case numstate.MatchString(str):
 		return NUMSTAT, str
-	case rev.MatchString(str):
-		return REV, str
 	case file.MatchString(str):
 		return FILE, str
+	case rev.MatchString(str):
+		return REV, str
 	case author.MatchString(str):
 		return AUTHOR, str
 	}
@@ -149,9 +151,9 @@ func (s *Scanner) read() rune {
 func (s *Scanner) unread() { _ = s.r.UnreadRune() }
 
 // isWhitespace returns true if the rune is a space, tab, or newline.
-func isWhitespace(ch rune) bool { return ch == ' ' }
+func isWhitespace(ch rune) bool { return ch == ' ' || ch == '\t' || ch == '\n' }
 
-func isEmpty(ch rune) bool { return isWhitespace(ch) || ch == '\t' }
+func isSpace(ch rune) bool { return ch == ' ' }
 
 func isAlphaNum(ch rune) bool { return isAlpha(ch) || isNum(ch) }
 
@@ -160,6 +162,8 @@ func isAlpha(ch rune) bool { return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch
 
 // isDigit returns true if the rune is a digit.
 func isNum(ch rune) bool { return (ch >= '0' && ch <= '9') }
+
+func isFilePath(ch rune) bool { return ch == '/' || ch == '.' || ch == '_' }
 
 // eof represents a marker rune for the end of the reader.
 var eof = rune(0)

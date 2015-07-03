@@ -24,11 +24,34 @@ func NewParser(r io.Reader) *Parser {
 
 // Parse parse git2 log
 // git log --all -M -C --numstat --date=short --pretty=format:'--%h--%cd--%cn'
-func (p *Parser) Prelude() (*Prelude, error) {
+func (p *Parser) Parse() (*Entry, error) {
+	entry := &Entry{}
+	prelude, err := p.prelude()
+	if err != nil {
+		return nil, err
+	}
+	entry.Prelude = prelude
+	for {
+		p.s.scanWhitespace()
+		change, err := p.change()
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+		entry.Changes = append(entry.Changes, *change)
+	}
+	return entry, nil
+}
+
+func (p *Parser) prelude() (*Prelude, error) {
 	prelude := &Prelude{}
 
-	// First token should be a revision
-	tok, lit := p.scanIgnoreSeparator()
+	// First token should be a SEPARATOR
+	tok, lit := p.scanIgnoreWhitespace()
+	if tok != SEPARATOR {
+		return nil, fmt.Errorf("found %q, expected SEPARATOR", lit)
+	}
+	tok, lit = p.scanIgnoreSeparator()
 	if tok != REV {
 		return nil, fmt.Errorf("found %q, expected REV", lit)
 	}
