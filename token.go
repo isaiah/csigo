@@ -8,11 +8,11 @@ import (
 type Token int
 
 var (
-	rev      = regexp.MustCompile(`[\da-f]+`)
-	author   = regexp.MustCompile(`[^\n]*`)
-	date     = regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
-	numstate = regexp.MustCompile(`[\d-]*`)
-	file     = regexp.MustCompile(`.+`)
+	rev      = regexp.MustCompile(`^[\da-f]+?$`)
+	author   = regexp.MustCompile(`^[\w\s]+?$`)
+	date     = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+	numstate = regexp.MustCompile(`\d+?$`)
+	file     = regexp.MustCompile(`^\w+?\.\w+?$`)
 )
 
 const (
@@ -45,4 +45,11 @@ type Prelude struct {
 	Author string
 	Rev    string
 	Date   string
+}
+
+// Change is the entry of change
+type Change struct {
+	LocAdded   int64
+	LocDeleted int64
+	Entry      string // file name
 }

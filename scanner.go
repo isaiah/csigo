@@ -25,7 +25,10 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 	// If we see whitespace then consume all contiguous whitespace.
 	// If we see a letter then consume as an ident or reserved word.
 	// If we see a digit then consume as a number.
-	if isDash(ch) {
+	if isEmpty(ch) {
+		s.unread()
+		return s.scanWhitespace()
+	} else if isDash(ch) {
 		s.unread()
 		return s.scanSeparator()
 	} else if isAlphaNum(ch) {
@@ -66,7 +69,10 @@ func (s *Scanner) scanWhitespace() (tok Token, lit string) {
 
 func (s *Scanner) scanSeparator() (tok Token, lit string) {
 	if isDash(s.read()) {
-		return SEPARATOR, "--"
+		if isDash(s.read()) {
+			return SEPARATOR, "--"
+		}
+		s.unread()
 	}
 	s.unread()
 	return
@@ -81,33 +87,48 @@ func (s *Scanner) scanPrelude() (tok Token, lit string) {
 	// Create a buffer and read the current character into it.
 	var buf bytes.Buffer
 	buf.WriteRune(s.read())
+	wasWS := false
 
 	// Read every subsequent ident character into the buffer.
 	// Non-ident characters and EOF will cause the loop to exit.
 	for {
 		if ch := s.read(); ch == eof {
 			break
-		} else if !isAlpha(ch) && !isNum(ch) && ch != '_' {
+		} else if isAlphaNum(ch) || isDash(ch) || ch == '.' || isWhitespace(ch) {
+			if isWhitespace(ch) {
+				if wasWS {
+					buf.Truncate(buf.Len() - 1)
+					s.unread()
+					break
+				}
+				wasWS = true
+			}
+			if isDash(ch) {
+				s.unread()
+				if tok, _ = s.scanSeparator(); tok == SEPARATOR {
+					break
+				}
+			}
+			_, _ = buf.WriteRune(ch)
+		} else {
 			s.unread()
 			break
-		} else {
-			_, _ = buf.WriteRune(ch)
 		}
 	}
 
 	// If the string matches a keyword then return that keyword.
 	str := buf.String()
 	switch {
-	case rev.MatchString(str):
-		return REV, str
-	case author.MatchString(str):
-		return AUTHOR, str
 	case date.MatchString(str):
 		return DATE, str
 	case numstate.MatchString(str):
 		return NUMSTAT, str
+	case rev.MatchString(str):
+		return REV, str
 	case file.MatchString(str):
 		return FILE, str
+	case author.MatchString(str):
+		return AUTHOR, str
 	}
 
 	// Otherwise return as illegal
@@ -128,7 +149,9 @@ func (s *Scanner) read() rune {
 func (s *Scanner) unread() { _ = s.r.UnreadRune() }
 
 // isWhitespace returns true if the rune is a space, tab, or newline.
-func isWhitespace(ch rune) bool { return ch == ' ' || ch == '\t' || ch == '\n' }
+func isWhitespace(ch rune) bool { return ch == ' ' }
+
+func isEmpty(ch rune) bool { return isWhitespace(ch) || ch == '\t' }
 
 func isAlphaNum(ch rune) bool { return isAlpha(ch) || isNum(ch) }
 

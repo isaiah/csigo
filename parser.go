@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"strconv"
 )
 
 // Parser represents a parser.
@@ -23,16 +24,11 @@ func NewParser(r io.Reader) *Parser {
 
 // Parse parse git2 log
 // git log --all -M -C --numstat --date=short --pretty=format:'--%h--%cd--%cn'
-func (p *Parser) Parse() (*Prelude, error) {
+func (p *Parser) Prelude() (*Prelude, error) {
 	prelude := &Prelude{}
 
-	// First token should be a "--"
-	if tok, lit := p.scan(); tok != SEPARATOR {
-		return nil, fmt.Errorf("found %q, expected SEPARATOR", lit)
-	}
-
-	// Read a field.
-	tok, lit := p.scan()
+	// First token should be a revision
+	tok, lit := p.scanIgnoreSeparator()
 	if tok != REV {
 		return nil, fmt.Errorf("found %q, expected REV", lit)
 	}
@@ -42,16 +38,37 @@ func (p *Parser) Parse() (*Prelude, error) {
 	if tok != DATE {
 		return nil, fmt.Errorf("found %q, expected DATE", lit)
 	}
-	prelude.Rev = lit
+	prelude.Date = lit
 
 	tok, lit = p.scanIgnoreSeparator()
 	if tok != AUTHOR {
 		return nil, fmt.Errorf("found %q, expected AUTHOR", lit)
 	}
-	prelude.Rev = lit
+	prelude.Author = lit
 
 	// Return the successfully parsed statement.
 	return prelude, nil
+}
+
+func (p *Parser) change() (*Change, error) {
+	change := &Change{}
+	tok, lit := p.scanIgnoreWhitespace()
+	if tok != NUMSTAT {
+		return nil, fmt.Errorf("found %q, expected NUMSTAT", lit)
+	}
+	change.LocAdded = mustParseInt(lit)
+	tok, lit = p.scanIgnoreWhitespace()
+	if tok != NUMSTAT {
+		return nil, fmt.Errorf("found %q, expected NUMSTAT", lit)
+	}
+	change.LocDeleted = mustParseInt(lit)
+	tok, lit = p.scanIgnoreWhitespace()
+	if tok != FILE {
+		return nil, fmt.Errorf("found %q, expected FILE", lit)
+	}
+	change.Entry = lit
+
+	return change, nil
 }
 
 // scan returns the next token from the underlying scanner.
@@ -91,3 +108,11 @@ func (p *Parser) scanIgnoreWhitespace() (tok Token, lit string) {
 
 // unscan pushes the previously read token back onto the buffer.
 func (p *Parser) unscan() { p.buf.n = 1 }
+
+func mustParseInt(s string) int64 {
+	i, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	return i
+}
