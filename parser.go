@@ -33,7 +33,6 @@ func (p *Parser) Parse() (entries []Entry, err error) {
 		p.s.unread()
 		entry, err := p.entry()
 		if err != nil {
-			fmt.Println(err)
 			break
 		}
 		entries = append(entries, *entry)
@@ -51,7 +50,6 @@ func (p *Parser) entry() (*Entry, error) {
 	for {
 		change, err := p.change()
 		if err != nil {
-			fmt.Println(err)
 			break
 		}
 		entry.Changes = append(entry.Changes, *change)
@@ -100,7 +98,7 @@ func (p *Parser) change() (*Change, error) {
 	change.LocDeleted = mustParseInt(lit)
 	tok, lit = p.scanIgnoreWhitespace()
 	if tok != FILE {
-		return nil, fmt.Errorf("found %q, expected FILE", lit)
+		return nil, fmt.Errorf("found %d, expected FILE", tok)
 	}
 	change.Entry = lit
 

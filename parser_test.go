@@ -13,7 +13,7 @@ var (
 )
 
 func TestParsePrelude(t *testing.T) {
-	reader := strings.NewReader("--990442e--2013-08-29--Adam Petersen")
+	reader := strings.NewReader("'--990442e--2013-08-29--Adam Petersen'")
 	parser := NewParser(reader)
 	prelude, err := parser.prelude()
 	if err != nil {
@@ -24,20 +24,32 @@ func TestParsePrelude(t *testing.T) {
 	}
 }
 
-func TestParseChange(t *testing.T) {
-	reader := strings.NewReader("1   0    project.clj")
+func parseChange(str string, t *testing.T) *Change {
+	reader := strings.NewReader(str)
 	parser := NewParser(reader)
 	change, err := parser.change()
 	if err != nil {
 		t.Fatal(err)
 	}
+	return change
+}
+
+func TestParseChange(t *testing.T) {
+	change := parseChange("1   0    project.clj", t)
 	if expectedChange != *change {
 		t.Errorf("expected %v, got %v", expectedChange, *change)
 	}
 }
 
+func TestParseChangeWithInvisibleFile(t *testing.T) {
+	change := parseChange("1   0    .gitignore", t)
+	if change.Entry != ".gitignore" {
+		t.Error("cannot find invisible file")
+	}
+}
+
 func TestParseEntry(t *testing.T) {
-	commit := `--990442e--2013-08-29--Adam Petersen
+	commit := `'--990442e--2013-08-29--Adam Petersen'
 1    0    project.clj
 2    4    src/code_maat/parsers/git.clj
 `
@@ -61,11 +73,11 @@ func TestParseEntry(t *testing.T) {
 }
 
 func TestParseEntries(t *testing.T) {
-	logs := `--b777738--2013-08-29--Adam Petersen
+	logs := `'--b777738--2013-08-29--Adam Petersen'
 10	9	src/code_maat/parsers/git.clj
 32	0	test/code_maat/parsers/git_test.clj
 
---a527b79--2013-08-29--Adam Petersen
+'--a527b79--2013-08-29--Adam Petersen'
 6	2	src/code_maat/parsers/git.clj
 0	7	test/code_maat/end_to_end/scenario_tests.clj
 18	0	test/code_maat/end_to_end/simple_git.txt

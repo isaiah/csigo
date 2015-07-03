@@ -22,16 +22,15 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 	// Read the next rune.
 	ch := s.read()
 
-	// If we see whitespace then consume all contiguous whitespace.
-	// If we see a letter then consume as an ident or reserved word.
-	// If we see a digit then consume as a number.
-	if isWhitespace(ch) {
+	if ch == '\'' {
+		return s.Scan()
+	} else if isWhitespace(ch) {
 		s.unread()
 		return s.scanWhitespace()
 	} else if isDash(ch) {
 		s.unread()
 		return s.scanSeparator()
-	} else if isAlphaNum(ch) {
+	} else if isAlphaNum(ch) || isFilePath(ch) {
 		s.unread()
 		return s.scanPrelude()
 	}
