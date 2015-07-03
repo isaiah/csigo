@@ -12,7 +12,7 @@ var (
 	author   = regexp.MustCompile(`^[\w\s]+?$`)
 	date     = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 	numstate = regexp.MustCompile(`\d+?$`)
-	file     = regexp.MustCompile(`^[\/\w]+\.\w+$`)
+	file     = regexp.MustCompile(`^[\/\w]*\.\w+$`)
 )
 
 const (
