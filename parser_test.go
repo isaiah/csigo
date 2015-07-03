@@ -37,14 +37,13 @@ func TestParseChange(t *testing.T) {
 }
 
 func TestParseEntry(t *testing.T) {
-	commit := `
---990442e--2013-08-29--Adam Petersen
+	commit := `--990442e--2013-08-29--Adam Petersen
 1    0    project.clj
 2    4    src/code_maat/parsers/git.clj
 `
 	reader := strings.NewReader(commit)
 	parser := NewParser(reader)
-	entry, err := parser.Parse()
+	entry, err := parser.entry()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,5 +57,27 @@ func TestParseEntry(t *testing.T) {
 		if change != entry.Changes[i] {
 			t.Errorf("change doens't match %v, got %v", change, entry.Changes[i])
 		}
+	}
+}
+
+func TestParseEntries(t *testing.T) {
+	logs := `--b777738--2013-08-29--Adam Petersen
+10	9	src/code_maat/parsers/git.clj
+32	0	test/code_maat/parsers/git_test.clj
+
+--a527b79--2013-08-29--Adam Petersen
+6	2	src/code_maat/parsers/git.clj
+0	7	test/code_maat/end_to_end/scenario_tests.clj
+18	0	test/code_maat/end_to_end/simple_git.txt
+21	0	test/code_maat/end_to_end/svn_live_data_test.clj
+`
+	reader := strings.NewReader(logs)
+	parser := NewParser(reader)
+	entries, _ := parser.Parse()
+	if len(entries) != 2 {
+		t.Fatalf("wrong number of entries found %d", len(entries))
+	}
+	if entries[1].Changes[3].LocAdded != 21 {
+		t.Error("the forth change of the second commit has 21 LocAdded")
 	}
 }

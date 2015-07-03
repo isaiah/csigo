@@ -24,7 +24,24 @@ func NewParser(r io.Reader) *Parser {
 
 // Parse parse git2 log
 // git log --all -M -C --numstat --date=short --pretty=format:'--%h--%cd--%cn'
-func (p *Parser) Parse() (*Entry, error) {
+func (p *Parser) Parse() (entries []Entry, err error) {
+	for {
+		ch := p.s.read()
+		if ch == eof {
+			break
+		}
+		p.s.unread()
+		entry, err := p.entry()
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+		entries = append(entries, *entry)
+	}
+	return
+}
+
+func (p *Parser) entry() (*Entry, error) {
 	entry := &Entry{}
 	prelude, err := p.prelude()
 	if err != nil {
@@ -32,7 +49,6 @@ func (p *Parser) Parse() (*Entry, error) {
 	}
 	entry.Prelude = prelude
 	for {
-		p.s.scanWhitespace()
 		change, err := p.change()
 		if err != nil {
 			fmt.Println(err)
@@ -46,13 +62,10 @@ func (p *Parser) Parse() (*Entry, error) {
 func (p *Parser) prelude() (*Prelude, error) {
 	prelude := &Prelude{}
 
-	// First token should be a SEPARATOR
-	tok, lit := p.scanIgnoreWhitespace()
-	if tok != SEPARATOR {
-		return nil, fmt.Errorf("found %q, expected SEPARATOR", lit)
-	}
-	tok, lit = p.scanIgnoreSeparator()
-	if tok != REV {
+	// First token should be a revision
+	tok, lit := p.scanIgnoreSeparator()
+	// revision also match all numbers
+	if tok != REV && tok != NUMSTAT {
 		return nil, fmt.Errorf("found %q, expected REV", lit)
 	}
 	prelude.Rev = lit
