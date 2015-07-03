@@ -51,7 +51,7 @@ type Prelude struct {
 type Change struct {
 	LocAdded   int64
 	LocDeleted int64
-	Entry      string // file name
+	Entity     string // file name
 }
 
 // Entry is a commit
