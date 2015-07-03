@@ -125,10 +125,10 @@ func (s *Scanner) scanPrelude() (tok Token, lit string) {
 		return DATE, str
 	case numstate.MatchString(str):
 		return NUMSTAT, str
-	case file.MatchString(str):
-		return FILE, str
 	case rev.MatchString(str):
 		return REV, str
+	case file.MatchString(str):
+		return FILE, str
 	case author.MatchString(str):
 		return AUTHOR, str
 	}
