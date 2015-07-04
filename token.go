@@ -49,6 +49,7 @@ type Prelude struct {
 
 // Change is the entry of change
 type Change struct {
+	*Prelude
 	LocAdded   int64
 	LocDeleted int64
 	Entity     string // file name

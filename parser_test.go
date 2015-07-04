@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	expectedPrelude = Prelude{"Adam Petersen", "990442e", "2013-08-29"}
+	expectedPrelude = &Prelude{"Adam Petersen", "990442e", "2013-08-29"}
 	expectedChange  = Change{LocAdded: 1, LocDeleted: 0, Entity: "project.clj"}
 	expectedChange2 = Change{LocAdded: 2, LocDeleted: 4, Entity: "src/code_maat/parsers/git.clj"}
-	expectedEntry   = Entry{Prelude: &expectedPrelude, Changes: []Change{expectedChange, expectedChange2}}
+	expectedEntry   = Entry{Prelude: expectedPrelude, Changes: []Change{expectedChange, expectedChange2}}
 )
 
 func TestParsePrelude(t *testing.T) {
@@ -19,8 +19,8 @@ func TestParsePrelude(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *prelude != expectedPrelude {
-		t.Errorf("expected %v, got %#v", expectedPrelude, prelude)
+	if *prelude != *expectedPrelude {
+		t.Errorf("expected %#v, got %#v", expectedPrelude, prelude)
 	}
 }
 
@@ -85,11 +85,24 @@ func TestParseEntries(t *testing.T) {
 `
 	reader := strings.NewReader(logs)
 	parser := NewParser(reader)
-	entries, _ := parser.Parse()
+	entries, _ := parser.entries()
 	if len(entries) != 2 {
 		t.Fatalf("wrong number of entries found %d", len(entries))
 	}
 	if entries[1].Changes[3].LocAdded != 21 {
 		t.Error("the forth change of the second commit has 21 LocAdded")
+	}
+}
+
+func TestFlattenEntry(t *testing.T) {
+	entries := []Entry{expectedEntry}
+	changes := flatten(entries)
+	if len(changes) != 2 {
+		t.Fatalf("expected 2 changes, got %d", len(changes))
+	}
+	for _, change := range changes {
+		if change.Prelude != expectedEntry.Prelude {
+			t.Errorf("change should have the same prelude as its entry")
+		}
 	}
 }
