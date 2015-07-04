@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	simple = []Entry{
+	simple = flatten([]Entry{
 		Entry{Prelude: &Prelude{Rev: "1", Date: "2015-07-01", Author: "IS"},
 			Changes: []Change{
 				Change{LocAdded: 10, LocDeleted: 1, Entity: "A"}}},
@@ -14,7 +14,7 @@ var (
 				Change{LocAdded: 20, LocDeleted: 2, Entity: "B"}}},
 		Entry{Prelude: &Prelude{Rev: "3", Date: "2015-07-02", Author: "IS"},
 			Changes: []Change{
-				Change{LocAdded: 2, LocDeleted: 0, Entity: "B"}}}}
+				Change{LocAdded: 2, LocDeleted: 0, Entity: "B"}}}})
 )
 
 func TestAbsolutesTrend(t *testing.T) {
@@ -46,12 +46,19 @@ func TestChurnByAuthor(t *testing.T) {
 func TestChurnByEntity(t *testing.T) {
 	churns := ByEntity(simple)
 	if len(churns) != 2 {
-		t.Fatalf("expected 2 churns, get %d", len(churns))
+		t.Fatalf("expected 2 churns, got %d", len(churns))
 	}
 	if churns[0].Entity != "A" {
 		t.Error("churns are not sorted")
 	}
 	if churns[0].Added != 10 || churns[0].Deleted != 1 {
 		t.Errorf("wrong Added %d, Deleted %d", churns[0].Added, churns[0].Deleted)
+	}
+}
+
+func TestChurnByOwnership(t *testing.T) {
+	churns := ByOwnership(simple)
+	if len(churns) != 3 {
+		t.Fatalf("expected 3 churns, got %d", len(churns))
 	}
 }

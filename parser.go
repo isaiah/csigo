@@ -24,7 +24,25 @@ func NewParser(r io.Reader) *Parser {
 
 // Parse parse git2 log
 // git log --all -M -C --numstat --date=short --pretty=format:'--%h--%cd--%cn'
-func (p *Parser) Parse() (entries []Entry, err error) {
+func (p *Parser) Parse() ([]Change, error) {
+	entries, err := p.entries()
+	if err != nil {
+		return nil, err
+	}
+	return flatten(entries), nil
+}
+
+func flatten(entries []Entry) (changes []Change) {
+	for _, entry := range entries {
+		for _, change := range entry.Changes {
+			change.Prelude = entry.Prelude
+			changes = append(changes, change)
+		}
+	}
+	return
+}
+
+func (p *Parser) entries() (entries []Entry, err error) {
 	for {
 		ch := p.s.read()
 		if ch == eof {

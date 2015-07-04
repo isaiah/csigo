@@ -15,57 +15,28 @@ type Churn struct {
 	Deleted int64
 }
 
-func AbsoluteTrends(entries []Entry) []Churn {
-	var churns []Churn
-	groups := groupByDate(entries)
-	var keys []string
-	for date := range groups {
-		keys = append(keys, date)
-	}
-	sort.Strings(keys)
-	for _, date := range keys {
+func AbsoluteTrends(changes []Change) (churns []Churn) {
+	dates, groups := groupByDate(changes)
+	for _, date := range dates {
 		churn := Churn{Date: date}
-		churn.totalChurn(groups[date])
+		churn.sumByChanges(groups[date])
 		churns = append(churns, churn)
 	}
 	return churns
-}
-
-func groupByDate(entries []Entry) map[string][]Entry {
-	ret := make(map[string][]Entry)
-	for _, entry := range entries {
-		ret[entry.Date] = append(ret[entry.Date], entry)
-	}
-	return ret
 }
 
 // ByAuthor calculates the churn trend by author
-func ByAuthor(entries []Entry) []Churn {
-	churns := []Churn{}
-	groups := make(map[string][]Entry)
-	for _, entry := range entries {
-		groups[entry.Author] = append(groups[entry.Author], entry)
-	}
-	var authors []string
-	for author := range groups {
-		authors = append(authors, author)
-	}
-	sort.Strings(authors)
+func ByAuthor(changes []Change) (churns []Churn) {
+	authors, groups := groupByAuthor(changes)
 	for _, author := range authors {
 		churn := Churn{Author: author}
-		churn.totalChurn(groups[author])
+		churn.sumByChanges(groups[author])
 		churns = append(churns, churn)
 	}
-	return churns
+	return
 }
 
-func (c *Churn) totalChurn(entries []Entry) {
-	for _, entry := range entries {
-		c.updateByChanges(entry.Changes)
-	}
-}
-
-func (c *Churn) updateByChanges(changes []Change) {
+func (c *Churn) sumByChanges(changes []Change) {
 	for _, change := range changes {
 		c.Added = c.Added + change.LocAdded
 		c.Deleted = c.Deleted + change.LocDeleted
@@ -73,23 +44,63 @@ func (c *Churn) updateByChanges(changes []Change) {
 }
 
 // ByEntity calculates churns by files
-func ByEntity(entries []Entry) []Churn {
-	churns := []Churn{}
-	groups := make(map[string][]Change)
-	for _, entry := range entries {
-		for _, change := range entry.Changes {
-			groups[change.Entity] = append(groups[change.Entity], change)
-		}
-	}
-	var entities []string
-	for entity := range groups {
-		entities = append(entities, entity)
-	}
-	sort.Strings(entities)
+func ByEntity(changes []Change) (churns []Churn) {
+	entities, groups := groupByEntity(changes)
 	for _, entity := range entities {
 		churn := Churn{Entity: entity}
-		churn.updateByChanges(groups[entity])
+		churn.sumByChanges(groups[entity])
 		churns = append(churns, churn)
 	}
-	return churns
+	return
+}
+
+// ByOwnership returns a table specifying the ownership of each module.
+// Ownership is defined as the amount of churn contributed by each author to each entity.
+func ByOwnership(changes []Change) (churns []Churn) {
+	// group by entity first
+	entities, groupsByEntity := groupByEntity(changes)
+	for _, entity := range entities {
+		authors, groupsByAuthor := groupByAuthor(groupsByEntity[entity])
+		for _, author := range authors {
+			churn := Churn{Author: author, Entity: entity}
+			churn.sumByChanges(groupsByAuthor[author])
+			churns = append(churns, churn)
+		}
+	}
+	return
+}
+
+func groupByEntity(changes []Change) (entities []string, groups map[string][]Change) {
+	groups = make(map[string][]Change)
+	for _, change := range changes {
+		groups[change.Entity] = append(groups[change.Entity], change)
+	}
+	entities = stringKeys(groups)
+	return
+}
+
+func groupByAuthor(changes []Change) (authors []string, groups map[string][]Change) {
+	groups = make(map[string][]Change)
+	for _, change := range changes {
+		groups[change.Author] = append(groups[change.Author], change)
+	}
+	authors = stringKeys(groups)
+	return
+}
+
+func groupByDate(changes []Change) (dates []string, groups map[string][]Change) {
+	groups = make(map[string][]Change)
+	for _, change := range changes {
+		groups[change.Date] = append(groups[change.Date], change)
+	}
+	dates = stringKeys(groups)
+	return
+}
+
+func stringKeys(groups map[string][]Change) (keys []string) {
+	for key := range groups {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	return
 }
