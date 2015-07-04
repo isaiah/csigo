@@ -48,4 +48,10 @@ func TestChurnByEntity(t *testing.T) {
 	if len(churns) != 2 {
 		t.Fatalf("expected 2 churns, get %d", len(churns))
 	}
+	if churns[0].Entity != "A" {
+		t.Error("churns are not sorted")
+	}
+	if churns[0].Added != 10 || churns[0].Deleted != 1 {
+		t.Errorf("wrong Added %d, Deleted %d", churns[0].Added, churns[0].Deleted)
+	}
 }

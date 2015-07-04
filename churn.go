@@ -9,6 +9,7 @@ type Churn struct {
 	// Dimension
 	Date   string
 	Author string
+	Entity string
 	// Measure
 	Added   int64
 	Deleted int64
@@ -24,12 +25,7 @@ func AbsoluteTrends(entries []Entry) []Churn {
 	sort.Strings(keys)
 	for _, date := range keys {
 		churn := Churn{Date: date}
-		for _, entry := range groups[date] {
-			for _, change := range entry.Changes {
-				churn.Added = churn.Added + change.LocAdded
-				churn.Deleted = churn.Deleted + change.LocDeleted
-			}
-		}
+		churn.totalChurn(groups[date])
 		churns = append(churns, churn)
 	}
 	return churns
@@ -57,12 +53,42 @@ func ByAuthor(entries []Entry) []Churn {
 	sort.Strings(authors)
 	for _, author := range authors {
 		churn := Churn{Author: author}
-		for _, entry := range groups[author] {
-			for _, change := range entry.Changes {
-				churn.Added = churn.Added + change.LocAdded
-				churn.Deleted = churn.Deleted + change.LocDeleted
-			}
+		churn.totalChurn(groups[author])
+		churns = append(churns, churn)
+	}
+	return churns
+}
+
+func (c *Churn) totalChurn(entries []Entry) {
+	for _, entry := range entries {
+		c.updateByChanges(entry.Changes)
+	}
+}
+
+func (c *Churn) updateByChanges(changes []Change) {
+	for _, change := range changes {
+		c.Added = c.Added + change.LocAdded
+		c.Deleted = c.Deleted + change.LocDeleted
+	}
+}
+
+// ByEntity calculates churns by files
+func ByEntity(entries []Entry) []Churn {
+	churns := []Churn{}
+	groups := make(map[string][]Change)
+	for _, entry := range entries {
+		for _, change := range entry.Changes {
+			groups[change.Entity] = append(groups[change.Entity], change)
 		}
+	}
+	var entities []string
+	for entity := range groups {
+		entities = append(entities, entity)
+	}
+	sort.Strings(entities)
+	for _, entity := range entities {
+		churn := Churn{Entity: entity}
+		churn.updateByChanges(groups[entity])
 		churns = append(churns, churn)
 	}
 	return churns
