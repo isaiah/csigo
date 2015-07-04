@@ -42,3 +42,10 @@ func TestChurnByAuthor(t *testing.T) {
 		t.Errorf("wrong Added %d, Deleted %d", churns[0].Added, churns[0].Deleted)
 	}
 }
+
+func TestChurnByEntity(t *testing.T) {
+	churns := ByEntity(simple)
+	if len(churns) != 2 {
+		t.Fatalf("expected 2 churns, get %d", len(churns))
+	}
+}
