@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"testing"
 )
 
@@ -40,6 +41,11 @@ var (
 		Entry{Prelude: &Prelude{Rev: "1", Date: "2015-07-02", Author: "single"},
 			Changes: []Change{
 				Change{LocAdded: 2, LocDeleted: 0, Entity: "Same"}}}})
+
+	onlyRemovedLines = flatten([]Entry{
+		Entry{Prelude: &Prelude{Rev: "1", Date: "2015-07-01", Author: "single"},
+			Changes: []Change{
+				Change{LocAdded: 0, LocDeleted: 1, Entity: "Same"}}}})
 )
 
 func TestAbsolutesTrend(t *testing.T) {
@@ -134,5 +140,16 @@ func TestIdentifyMainContributorOnSharedEntities(t *testing.T) {
 	expected := Contributor{Entity: "A", Author: "author2", Added: 15, Total: 27}
 	if mainDevs[0] != expected {
 		t.Errorf("expected main contributor %v, got %v", expected, mainDevs[0])
+	}
+}
+
+func TestOwnershipIsNoneWithoutAddedLines(t *testing.T) {
+	mainDevs := ByMainContributor(onlyRemovedLines)
+	expected := Contributor{Entity: "Same", Author: "single", Added: 0, Total: 0}
+	if mainDevs[0] != expected {
+		t.Fatalf("expected empty contributor, got %v", mainDevs[0])
+	}
+	if !math.IsNaN(mainDevs[0].Ownership()) {
+		t.Errorf("expected 0 ownership, got %f", mainDevs[0].Ownership())
 	}
 }
