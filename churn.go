@@ -15,6 +15,43 @@ type Churn struct {
 	Deleted int64
 }
 
+// Contributor is a author of the entity
+type Contributor struct {
+	Entity string
+	Author string
+	Added  int64
+	Total  int64
+}
+
+func (c *Churn) sumByChanges(changes []Change) {
+	for _, change := range changes {
+		c.Added = c.Added + change.LocAdded
+		c.Deleted = c.Deleted + change.LocDeleted
+	}
+}
+
+func (contrib *Contributor) Ownership() float64 {
+	return float64(contrib.Added) / float64(contrib.Total)
+}
+
+// ByMainContributor Identify the main contributor of each entity, main contributor is the author of the entity who contributed the most lines of codes
+func ByMainContributor(changes []Change) (cs []Contributor) {
+	churnGroups := groupByAuthorContribution(changes)
+	for entity, churns := range churnGroups {
+		var totalContrib int64
+		var mainContrib *Churn
+		for _, churn := range churns {
+			if mainContrib == nil || mainContrib.Added < churn.Added {
+				mainContrib = &churn
+			}
+			totalContrib = totalContrib + churn.Added
+		}
+		contributor := Contributor{Entity: entity, Author: mainContrib.Author, Added: mainContrib.Added, Total: totalContrib}
+		cs = append(cs, contributor)
+	}
+	return
+}
+
 func AbsoluteTrends(changes []Change) (churns []Churn) {
 	dates, groups := groupByDate(changes)
 	for _, date := range dates {
@@ -36,13 +73,6 @@ func ByAuthor(changes []Change) (churns []Churn) {
 	return
 }
 
-func (c *Churn) sumByChanges(changes []Change) {
-	for _, change := range changes {
-		c.Added = c.Added + change.LocAdded
-		c.Deleted = c.Deleted + change.LocDeleted
-	}
-}
-
 // ByEntity calculates churns by files
 func ByEntity(changes []Change) (churns []Churn) {
 	entities, groups := groupByEntity(changes)
@@ -57,6 +87,15 @@ func ByEntity(changes []Change) (churns []Churn) {
 // ByOwnership returns a table specifying the ownership of each module.
 // Ownership is defined as the amount of churn contributed by each author to each entity.
 func ByOwnership(changes []Change) (churns []Churn) {
+	groupsByAuthorContrib := groupByAuthorContribution(changes)
+	for _, cs := range groupsByAuthorContrib {
+		churns = append(churns, cs...)
+	}
+	return
+}
+
+func groupByAuthorContribution(changes []Change) map[string][]Churn {
+	groupsByAuthorContrib := make(map[string][]Churn)
 	// group by entity first
 	entities, groupsByEntity := groupByEntity(changes)
 	for _, entity := range entities {
@@ -64,10 +103,10 @@ func ByOwnership(changes []Change) (churns []Churn) {
 		for _, author := range authors {
 			churn := Churn{Author: author, Entity: entity}
 			churn.sumByChanges(groupsByAuthor[author])
-			churns = append(churns, churn)
+			groupsByAuthorContrib[entity] = append(groupsByAuthorContrib[entity], churn)
 		}
 	}
-	return
+	return groupsByAuthorContrib
 }
 
 func groupByEntity(changes []Change) (entities []string, groups map[string][]Change) {
