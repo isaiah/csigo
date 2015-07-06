@@ -1,5 +1,16 @@
 package main
 
+// The idea behind effort is to identify how much each author
+// contributed to a module. The measure here is a bit more
+// rough than the churn metrics. On the other hand, the metric
+// is available for all supported VCS.
+// I use the generated statistics as a guide when refactoring;
+// by ranking the authors based on their amount of contribution
+// I know who to ask when visiting a new module.
+//
+// The analysis in the module is based on research by
+// Marco D’Ambros, Harald C. Gall, Michele Lanza, and Martin Pinzger.
+
 import (
 	"math"
 )
@@ -17,6 +28,7 @@ type Effort struct {
 	AuthorRevs    []authorRev
 }
 
+// ByRevisionsPerAuthor returns all the contributors for the entity and their number of revisions
 func ByRevisionsPerAuthor(changes []Change) (efforts []Effort) {
 	entities, groupsByEntity := groupByEntity(changes)
 	for _, entity := range entities {

@@ -1,5 +1,13 @@
 package main
 
+// This module contains functions for calculating churn metrics.
+// Code churn is related to the quality of modules; the higher
+// the churn, the more post-release defects.
+// Further, inspecting the churn trend lets us spot certain
+// organization-oriented patterns. For example, we may spot
+// integration bottlenecks as spikes just before the end of
+// one iteration.
+
 import (
 	"sort"
 )
