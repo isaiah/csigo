@@ -77,6 +77,42 @@ func TestEntityFragmentationForMultipleEfforts(t *testing.T) {
 	assert(t, fmt.Sprintf("%.2f", efforts[0].Fragmentation), "0.67")
 }
 
+func TestIdentifyMainContributorByRevisions(t *testing.T) {
+	sharedEffort := []Entry{
+		Entry{Prelude: &Prelude{Rev: "1", Author: "a1", Date: "2015-07-01"},
+			Changes: []Change{Change{Entity: "A"}}},
+		Entry{Prelude: &Prelude{Rev: "2", Author: "a2", Date: "2015-07-02"},
+			Changes: []Change{Change{Entity: "A"}}},
+		Entry{Prelude: &Prelude{Rev: "3", Author: "a2", Date: "2015-07-03"},
+			Changes: []Change{Change{Entity: "A"}}},
+		Entry{Prelude: &Prelude{Rev: "4", Author: "a3", Date: "2015-07-04"},
+			Changes: []Change{Change{Entity: "B"}}},
+		Entry{Prelude: &Prelude{Rev: "5", Author: "a4", Date: "2015-07-05"},
+			Changes: []Change{Change{Entity: "C"}}},
+		Entry{Prelude: &Prelude{Rev: "6", Author: "a5", Date: "2015-07-06"},
+			Changes: []Change{Change{Entity: "C"}}},
+	}
+
+	efforts := ByRevisionsPerAuthor(flatten(sharedEffort))
+
+	if len(efforts) != 3 {
+		t.Fatalf("expected 3 efforts, got %d", len(efforts))
+	}
+	author, ownership := efforts[0].MainContributor()
+	if author != "a2" || fmt.Sprintf("%.2f", ownership) != "0.67" {
+		t.Errorf("main contributor to the first entity should be %s, got %s", "a2", author)
+	}
+	author, ownership = efforts[1].MainContributor()
+	if author != "a3" || ownership != 1 {
+		t.Errorf("main contributor to the second entity should be %s, got %s", "a3", author)
+	}
+	author, ownership = efforts[2].MainContributor()
+	if author != "a5" || fmt.Sprintf("%.2f", ownership) != "0.50" {
+		t.Errorf("main contributor to the third entity should be %s, got %s", "a5", author)
+	}
+
+}
+
 func assert(t *testing.T, a, b interface{}) {
 	if !reflect.DeepEqual(a, b) {
 		t.Errorf("expected %v, got %v", b, a)

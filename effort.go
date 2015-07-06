@@ -49,3 +49,14 @@ func (effort *Effort) calculateFragmentation() {
 	}
 	effort.Fragmentation = 1 - frag
 }
+
+// MainContributor returns the author and parcentage of revisions to the entity
+func (effort *Effort) MainContributor() (string, float64) {
+	var mainContrib *authorRev
+	for _, rev := range effort.AuthorRevs {
+		if mainContrib == nil || mainContrib.Count < rev.Count {
+			mainContrib = &rev
+		}
+	}
+	return mainContrib.Author, float64(mainContrib.Count) / float64(effort.Total)
+}
