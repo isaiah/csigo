@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -62,8 +63,22 @@ func TestEffortsForMultipleAuthors(t *testing.T) {
 	assert(t, effort, expected)
 }
 
+func TestEntityFragmentationForSingleEffort(t *testing.T) {
+	efforts := ByEntityFragmentation(singleEffort)
+	assert(t, efforts[0].Entity, "A")
+	assert(t, efforts[0].Fragmentation, 0.0)
+	assert(t, efforts[1].Entity, "B")
+	assert(t, efforts[1].Fragmentation, 0.0)
+}
+
+func TestEntityFragmentationForMultipleEfforts(t *testing.T) {
+	efforts := ByEntityFragmentation(multipleEfforts)
+	assert(t, efforts[0].Entity, "A")
+	assert(t, fmt.Sprintf("%.2f", efforts[0].Fragmentation), "0.67")
+}
+
 func assert(t *testing.T, a, b interface{}) {
 	if !reflect.DeepEqual(a, b) {
-		t.Errorf("expected %v, got %v", a, b)
+		t.Errorf("expected %v, got %v", b, a)
 	}
 }
