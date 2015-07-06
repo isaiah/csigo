@@ -2,7 +2,6 @@ package main
 
 import (
 	"math"
-	"strings"
 )
 
 //  This module attempts to give some heuristics on
@@ -26,25 +25,20 @@ type Communication struct {
 	Strength float64
 }
 
-const (
-	// NonVisibleChar to join and split author name combinations
-	NonVisibleChar = "\\0"
-)
-
 // BySharedEntities calculates communications between two contributors, based on how many entities they co-authored
 func BySharedEntities(changes []Change) (communications []Communication) {
 	// XXX fix the calculation, divide occurance of co-author (num ofenity) by average of total commit is wrong
 	efforts := ByRevisionsPerAuthor(changes)
 	perAuthor := revsPerAuthor(efforts)
-	comboCount := make(map[string]int)
+	comboCount := make(map[keyCombo]int)
 	for combo := range combinations(efforts) {
-		names := strings.Join(combo, NonVisibleChar)
+		names := keyCombo{combo[0], combo[1]}
 		comboCount[names] = comboCount[names] + 1
 	}
 	for c, count := range comboCount {
-		combo := strings.Split(c, NonVisibleChar)
-		average := math.Ceil(float64(perAuthor[combo[0]]+perAuthor[combo[1]]) / 2.0)
-		communication := Communication{Author: combo[0], Peer: combo[1], Shared: count,
+		initial, peer := c.initial, c.peer
+		average := math.Ceil(float64(perAuthor[initial]+perAuthor[peer]) / 2.0)
+		communication := Communication{Author: initial, Peer: peer, Shared: count,
 			Average: average, Strength: float64(count) / average}
 		communications = append(communications, communication)
 	}
