@@ -32,7 +32,7 @@ func TestEntityAge(t *testing.T) {
 
 	aAge, _ := time.ParseDuration("24h")
 	bAge, _ := time.ParseDuration(fmt.Sprintf("%dh", threeMonths+sixDays))
-	codeAge := ByAge(flatten(commits), now)
+	codeAge := ByAge(Flatten(commits), now)
 	assert(t, codeAge["A"], aAge)
 	assert(t, codeAge["B"], bAge)
 }
@@ -42,7 +42,7 @@ func TestCodeGetOlderAsTimePassesBy(t *testing.T) {
 	now, _ := time.Parse(DateLayout, "2014-05-06")
 	aAge, _ := time.ParseDuration(fmt.Sprintf("%dh", 1*month+day))
 	bAge, _ := time.ParseDuration(fmt.Sprintf("%dh", 4*month+6*day))
-	codeAge := ByAge(flatten(commits), now)
+	codeAge := ByAge(Flatten(commits), now)
 	assert(t, codeAge["A"], aAge)
 	assert(t, codeAge["B"], bAge)
 
@@ -50,7 +50,7 @@ func TestCodeGetOlderAsTimePassesBy(t *testing.T) {
 	now, _ = time.Parse(DateLayout, "2015-04-06")
 	aAge, _ = time.ParseDuration(fmt.Sprintf("%dh", 12*month+6*day))
 	bAge, _ = time.ParseDuration(fmt.Sprintf("%dh", 15*month+11*day))
-	codeAge = ByAge(flatten(commits), now)
+	codeAge = ByAge(Flatten(commits), now)
 	assert(t, codeAge["A"], aAge)
 	assert(t, codeAge["B"], bAge)
 
@@ -59,7 +59,7 @@ func TestCodeWasYoungerInThePast(t *testing.T) {
 	now, _ := time.Parse(DateLayout, "2014-03-06")
 	aAge, _ := time.ParseDuration(fmt.Sprintf("%dh", 6*day))
 	bAge, _ := time.ParseDuration(fmt.Sprintf("%dh", 2*month+5*day))
-	codeAge := ByAge(flatten(commits), now)
+	codeAge := ByAge(Flatten(commits), now)
 	assert(t, codeAge["A"], aAge)
 	assert(t, codeAge["B"], bAge)
 }

@@ -20,7 +20,7 @@ package main
 func ByDegree(entries []Entry) map[keyCombo]float64 {
 	coupling := make(map[keyCombo]float64)
 	numRevs := make(map[string]int)
-	for _, change := range flatten(entries) {
+	for _, change := range Flatten(entries) {
 		numRevs[change.Entity]++
 	}
 	for combo, count := range CouplingByRevision(entries) {

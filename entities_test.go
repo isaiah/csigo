@@ -19,7 +19,7 @@ var (
 )
 
 func TestGroupEntityByRevCount(t *testing.T) {
-	entities := ByRevision(flatten(vcsdTestData))
+	entities := ByRevision(Flatten(vcsdTestData))
 	if len(entities) != 2 {
 		t.Fatalf("expected 2 entities, got %d", len(entities))
 	}

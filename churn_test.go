@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	simple = flatten([]Entry{
+	simple = Flatten([]Entry{
 		Entry{Prelude: &Prelude{Rev: "1", Date: "2015-07-01", Author: "IS"},
 			Changes: []Change{
 				Change{LocAdded: 10, LocDeleted: 1, Entity: "A"}}},
@@ -17,7 +17,7 @@ var (
 			Changes: []Change{
 				Change{LocAdded: 2, LocDeleted: 0, Entity: "B"}}}})
 
-	sameAuthor = flatten([]Entry{
+	sameAuthor = Flatten([]Entry{
 		Entry{Prelude: &Prelude{Rev: "1", Date: "2015-07-01", Author: "author1"},
 			Changes: []Change{
 				Change{LocAdded: 10, LocDeleted: 1, Entity: "A"}}},
@@ -31,7 +31,7 @@ var (
 			Changes: []Change{
 				Change{LocAdded: 8, LocDeleted: 2, Entity: "A"}}}})
 
-	singleAuthor = flatten([]Entry{
+	singleAuthor = Flatten([]Entry{
 		Entry{Prelude: &Prelude{Rev: "1", Date: "2015-07-01", Author: "single"},
 			Changes: []Change{
 				Change{LocAdded: 10, LocDeleted: 1, Entity: "Same"}}},
@@ -42,7 +42,7 @@ var (
 			Changes: []Change{
 				Change{LocAdded: 2, LocDeleted: 0, Entity: "Same"}}}})
 
-	onlyRemovedLines = flatten([]Entry{
+	onlyRemovedLines = Flatten([]Entry{
 		Entry{Prelude: &Prelude{Rev: "1", Date: "2015-07-01", Author: "single"},
 			Changes: []Change{
 				Change{LocAdded: 0, LocDeleted: 1, Entity: "Same"}}}})

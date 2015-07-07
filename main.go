@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 	"os/exec"
 )
 
@@ -23,5 +26,14 @@ func main() {
 	if err = cmd.Wait(); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%v", entries)
+
+	churns := AbsoluteTrends(Flatten(entries))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		encoder := json.NewEncoder(w)
+		err := encoder.Encode(churns)
+		if err != nil {
+			fmt.Fprint(w, err)
+		}
+	})
+	http.ListenAndServe(":8080", nil)
 }

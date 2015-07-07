@@ -29,7 +29,7 @@ func TestCommunicationNeedsForSharedAuthorship(t *testing.T) {
 			Changes: []Change{Change{Entity: "B"}}},
 		Entry{Prelude: &Prelude{Rev: "5", Author: "jt", Date: "2015-07-05"},
 			Changes: []Change{Change{Entity: "B"}}}}
-	coms := BySharedEntities(flatten(sharingAuthors))
+	coms := BySharedEntities(Flatten(sharingAuthors))
 	assert(t, len(coms), 3)
 	for _, com := range coms {
 		if com.Author == "at" && com.Peer == "jt" {

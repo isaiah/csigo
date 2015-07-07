@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	singleEffort = flatten(
+	singleEffort = Flatten(
 		[]Entry{
 			Entry{Prelude: &Prelude{Rev: "1", Author: "author", Date: "2015-07-01"},
 				Changes: []Change{Change{Entity: "A"}}},
@@ -16,7 +16,7 @@ var (
 			Entry{Prelude: &Prelude{Rev: "3", Author: "author", Date: "2015-07-03"},
 				Changes: []Change{Change{Entity: "B"}}}})
 
-	multipleEfforts = flatten(
+	multipleEfforts = Flatten(
 		[]Entry{
 			Entry{Prelude: &Prelude{Rev: "1", Author: "author1", Date: "2015-07-01"},
 				Changes: []Change{Change{Entity: "A"}}},
@@ -93,7 +93,7 @@ func TestIdentifyMainContributorByRevisions(t *testing.T) {
 			Changes: []Change{Change{Entity: "C"}}},
 	}
 
-	efforts := ByRevisionsPerAuthor(flatten(sharedEffort))
+	efforts := ByRevisionsPerAuthor(Flatten(sharedEffort))
 
 	if len(efforts) != 3 {
 		t.Fatalf("expected 3 efforts, got %d", len(efforts))

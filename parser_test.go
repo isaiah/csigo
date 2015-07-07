@@ -85,7 +85,7 @@ func TestParseEntries(t *testing.T) {
 `
 	reader := strings.NewReader(logs)
 	parser := NewParser(reader)
-	entries, _ := parser.entries()
+	entries, _ := parser.Parse()
 	if len(entries) != 2 {
 		t.Fatalf("wrong number of entries found %d", len(entries))
 	}
@@ -96,7 +96,7 @@ func TestParseEntries(t *testing.T) {
 
 func TestFlattenEntry(t *testing.T) {
 	entries := []Entry{expectedEntry}
-	changes := flatten(entries)
+	changes := Flatten(entries)
 	if len(changes) != 2 {
 		t.Fatalf("expected 2 changes, got %d", len(changes))
 	}
