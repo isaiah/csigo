@@ -1,8 +1,8 @@
 package main
 
 type keyCombo struct {
-	initial string
-	peer    string
+	entity string
+	peer   string
 }
 
 func CouplingByRevision(entries []Entry) map[keyCombo]int {

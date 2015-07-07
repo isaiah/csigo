@@ -36,8 +36,8 @@ func BySharedEntities(changes []Change) (communications []Communication) {
 		comboCount[names] = comboCount[names] + 1
 	}
 	for c, count := range comboCount {
-		initial, peer := c.initial, c.peer
-		average := math.Ceil(float64(perAuthor[initial]+perAuthor[peer]) / 2.0)
+		initial, peer := c.entity, c.peer
+		average := math.Ceil(float64(perAuthor[initial]+perAuthor[peer]) / 2)
 		communication := Communication{Author: initial, Peer: peer, Shared: count,
 			Average: average, Strength: float64(count) / average}
 		communications = append(communications, communication)
