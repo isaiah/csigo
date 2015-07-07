@@ -21,7 +21,7 @@ func ByDegree(entries []Entry) map[keyCombo]float64 {
 	coupling := make(map[keyCombo]float64)
 	numRevs := make(map[string]int)
 	for _, change := range flatten(entries) {
-		numRevs[change.Entity] = numRevs[change.Entity] + 1
+		numRevs[change.Entity]++
 	}
 	for combo, count := range CouplingByRevision(entries) {
 		average := float64(numRevs[combo.entity]+numRevs[combo.peer]) / 2

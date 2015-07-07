@@ -57,7 +57,7 @@ func (effort *Effort) calculateFragmentation() {
 	var frag float64
 	for _, rev := range effort.AuthorRevs {
 		division := float64(rev.Count) / float64(effort.Total)
-		frag = frag + math.Pow(division, 2)
+		frag += math.Pow(division, 2)
 	}
 	effort.Fragmentation = 1 - frag
 }

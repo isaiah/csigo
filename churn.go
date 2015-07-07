@@ -33,8 +33,8 @@ type Contributor struct {
 
 func (c *Churn) sumByChanges(changes []Change) {
 	for _, change := range changes {
-		c.Added = c.Added + change.LocAdded
-		c.Deleted = c.Deleted + change.LocDeleted
+		c.Added += change.LocAdded
+		c.Deleted += change.LocDeleted
 	}
 }
 
@@ -52,7 +52,7 @@ func ByMainContributor(changes []Change) (cs []Contributor) {
 			if mainContrib == nil || mainContrib.Added < churn.Added {
 				mainContrib = &churn
 			}
-			totalContrib = totalContrib + churn.Added
+			totalContrib += churn.Added
 		}
 		contributor := Contributor{Entity: entity, Author: mainContrib.Author, Added: mainContrib.Added, Total: totalContrib}
 		cs = append(cs, contributor)

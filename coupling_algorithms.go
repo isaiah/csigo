@@ -9,7 +9,7 @@ func CouplingByRevision(entries []Entry) map[keyCombo]int {
 	coupling := make(map[keyCombo]int)
 	for c := range entityCombinations(entries) {
 		combo := keyCombo{c[0], c[1]}
-		coupling[combo] = coupling[combo] + 1
+		coupling[combo]++
 	}
 	return coupling
 }

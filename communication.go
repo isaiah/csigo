@@ -33,7 +33,7 @@ func BySharedEntities(changes []Change) (communications []Communication) {
 	comboCount := make(map[keyCombo]int)
 	for combo := range combinations(efforts) {
 		names := keyCombo{combo[0], combo[1]}
-		comboCount[names] = comboCount[names] + 1
+		comboCount[names]++
 	}
 	for c, count := range comboCount {
 		initial, peer := c.entity, c.peer
@@ -66,7 +66,7 @@ func revsPerAuthor(efforts []Effort) map[string]int {
 	perAuthor := make(map[string]int)
 	for _, effort := range efforts {
 		for _, author := range effort.AuthorRevs {
-			perAuthor[author.Author] = perAuthor[author.Author] + author.Count
+			perAuthor[author.Author] += author.Count
 		}
 	}
 	return perAuthor

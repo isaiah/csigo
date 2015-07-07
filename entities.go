@@ -24,7 +24,7 @@ func ByRevision(changes []Change) (entities []EntityRevCount) {
 func groupEntitiesByRevCount(changes []Change) map[string]int {
 	groups := make(map[string]int)
 	for _, change := range changes {
-		groups[change.Entity] = groups[change.Entity] + 1
+		groups[change.Entity]++
 	}
 	return groups
 }
