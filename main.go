@@ -3,9 +3,15 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os/exec"
+)
+
+var (
+	indexTemplate = template.Must(template.ParseFiles("static/index.html"))
 )
 
 func main() {
@@ -29,11 +35,32 @@ func main() {
 
 	churns := AbsoluteTrends(Flatten(entries))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if err := indexTemplate.Execute(w, nil); err != nil {
+			renderError(w, err)
+		}
+	})
+	http.HandleFunc("/bundle.js", func(w http.ResponseWriter, r *http.Request) {
+		// Hot load for development
+		js, err := ioutil.ReadFile("static/bundle.js")
+		if err != nil {
+			renderError(w, err)
+		}
+		fmt.Fprint(w, string(js))
+	})
+	http.HandleFunc("/churns", func(w http.ResponseWriter, r *http.Request) {
 		encoder := json.NewEncoder(w)
 		err := encoder.Encode(churns)
 		if err != nil {
 			fmt.Fprint(w, err)
 		}
 	})
-	http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func renderError(w http.ResponseWriter, err error) {
+	w.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprint(w, err)
 }

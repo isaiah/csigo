@@ -1,2 +1,6 @@
 *.test
+node_modules/
+static/*.js
+static/*.json
+
 csigo
