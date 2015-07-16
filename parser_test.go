@@ -82,11 +82,15 @@ func TestParseEntries(t *testing.T) {
 0	7	test/code_maat/end_to_end/scenario_tests.clj
 18	0	test/code_maat/end_to_end/simple_git.txt
 21	0	test/code_maat/end_to_end/svn_live_data_test.clj
+24	0	webpack.config.js
+
+'--f80d4b6--2013-08-30--Isaiah Peng'
+33      3       main.go
 `
 	reader := strings.NewReader(logs)
 	parser := NewParser(reader)
 	entries, _ := parser.Parse()
-	if len(entries) != 2 {
+	if len(entries) != 3 {
 		t.Fatalf("wrong number of entries found %d", len(entries))
 	}
 	if entries[1].Changes[3].LocAdded != 21 {
